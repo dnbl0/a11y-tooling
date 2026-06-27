@@ -1,0 +1,36 @@
+name: Accessibility check
+
+# Runs the component-level accessibility checker on every pull request,
+# failing the build if new serious+ violations are introduced. This is the
+# engineer-time half of the platform's shift-left approach.
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  a11y:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      # Start your component server (Storybook shown here). Adjust to your app.
+      - name: Start Storybook
+        run: |
+          npm run build-storybook --if-present
+          npx http-server storybook-static -p 6006 &
+          npx wait-on http://localhost:6006
+
+      - name: Run accessibility checker
+        run: npx tsx packages/ci-checker/index.ts --config packages/ci-checker/a11y.config.example.json

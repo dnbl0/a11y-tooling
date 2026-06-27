@@ -1,0 +1,12 @@
+{
+  "name": "Auditr — Accessibility",
+  "id": "auditr-a11y-plugin",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["http://localhost:3000", "https://your-deployment.example.com"],
+    "reasoning": "Posts accessibility scan results to the Auditr platform."
+  }
+}

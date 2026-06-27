@@ -1,0 +1,13 @@
+{
+  "baseUrl": "http://localhost:6006",
+  "routes": [
+    "/iframe.html?id=button--primary",
+    "/iframe.html?id=button--secondary",
+    "/iframe.html?id=forms-input--default"
+  ],
+  "failOn": "serious",
+  "postTo": {
+    "endpoint": "http://localhost:3000/api/sites/ingest",
+    "siteId": "REPLACE_WITH_SITE_ID"
+  }
+}

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body { font: 13px -apple-system, system-ui, sans-serif; margin: 0; padding: 16px; color: #141b22; }
+      h1 { font-size: 14px; margin: 0 0 12px; }
+      .count { font-size: 32px; font-weight: 600; }
+      .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e3e9ed; }
+      button { width: 100%; margin-top: 16px; padding: 10px; border: 0; border-radius: 8px; background: #3d8bff; color: white; font-weight: 600; cursor: pointer; }
+      .muted { color: #8595a1; font-size: 12px; margin-top: 8px; }
+      pre { background: #f4f7f9; padding: 8px; border-radius: 6px; max-height: 160px; overflow: auto; font-size: 11px; }
+    </style>
+  </head>
+  <body>
+    <h1>Accessibility scan</h1>
+    <div class="count" id="count">—</div>
+    <div class="muted">issues found in this page</div>
+    <div id="list"></div>
+    <button id="send">Send to Auditr</button>
+    <p class="muted">Set the API endpoint and site ID before sending.</p>
+
+    <script>
+      const ENDPOINT = "http://localhost:3000/api/sites/ingest";
+      let current = null;
+
+      onmessage = (event) => {
+        const msg = event.data.pluginMessage;
+        if (msg.type === "results") {
+          current = msg.payload;
+          document.getElementById("count").textContent = msg.payload.pages[0].issues.length;
+          const byRule = {};
+          for (const i of msg.payload.pages[0].issues) byRule[i.ruleId] = (byRule[i.ruleId] || 0) + 1;
+          document.getElementById("list").innerHTML = Object.entries(byRule)
+            .map(([r, n]) => `<div class="row"><span>${r}</span><strong>${n}</strong></div>`)
+            .join("");
+        }
+      };
+
+      document.getElementById("send").onclick = async () => {
+        if (!current) return;
+        try {
+          const res = await fetch(ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(current),
+          });
+          const data = await res.json();
+          alert("Sent. Scan score: " + (data.score ?? "?"));
+        } catch (e) {
+          alert("Failed to send: " + e.message);
+        }
+      };
+    </script>
+  </body>
+</html>
